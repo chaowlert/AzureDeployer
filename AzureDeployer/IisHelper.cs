@@ -17,6 +17,23 @@ namespace AzureDeployer
             }
         }
 
+        public static void RemoveXPowerBy()
+        {
+            using (var serverManager = new ServerManager())
+            {
+                var config = serverManager.GetApplicationHostConfiguration();
+                var httpProtocolSection = config.GetSection("system.webServer/httpProtocol");
+                var customHeaderCollection = httpProtocolSection.GetCollection("customHeaders");
+
+                var xPowerByHeader = customHeaderCollection.FirstOrDefault(h => h.ElementTagName == "add" && (string)h.GetAttributeValue("name") == "X-Powered-By");
+                if (xPowerByHeader != null)
+                {
+                    customHeaderCollection.Remove(xPowerByHeader);
+                    serverManager.CommitChanges();
+                }
+            }
+        }
+
         public static void SetDynamicCompression(params string[] mediaTypes)
         {
             using (var serverManager = new ServerManager())

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>AzureDeployer</id>
+    <version>0.1.0</version>
+    <title>Azure Deployer</title>
+    <authors>Chaowlert</authors>
+    <owners>Chaowlert</owners>
+    <projectUrl>https://github.com/chaowlert/AzureDeployer</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This is to deploy files or Web Application to WebRole. This is useful for deploying NLog.config, asset files, or additional web applications.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>azure deploy</tags>
+  </metadata>
+</package>
