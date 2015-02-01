@@ -7,6 +7,7 @@ using Common.Logging;
 using Ionic.Zip;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 
 namespace AzureDeployer
 {
@@ -15,12 +16,15 @@ namespace AzureDeployer
         static readonly ILog _logger = LogManager.GetLogger(RoleEnvironment.CurrentRoleInstance.Id);
         readonly string _appRootPath;
         readonly string _localResourcePath;
-        public ModuleDeployer(string localResource, string appRootPath = null)
+        readonly string _systemPath;
+        public ModuleDeployer(string localResource, string appRootPath = null, bool allowSystemPath = false)
         {
             _localResourcePath = RoleEnvironment.GetLocalResource(localResource).RootPath;
             if (!string.IsNullOrEmpty(appRootPath) && appRootPath[0] != '/')
                 appRootPath = '/' + appRootPath;
             _appRootPath = appRootPath;
+            if (allowSystemPath)
+                _systemPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
         }
 
         readonly Dictionary<string, DateTime> _moduleVersions = new Dictionary<string, DateTime>();
@@ -69,7 +73,6 @@ namespace AzureDeployer
 
         void deploy(CloudBlockBlob blob, string name)
         {
-            _logger.Info("deploying " + name);
             if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                 deployZip(blob, name);
             else
@@ -80,20 +83,24 @@ namespace AzureDeployer
         {
             if (path.StartsWith("approot/") || path.StartsWith("sitesroot/"))
                 return _rootPath;
+            else if (_systemPath != null &&
+                (path.StartsWith("SysWOW64/") || path.StartsWith("System32/")))
+                return _systemPath;
             else
                 return _localResourcePath;
         }
         static bool isWebPath(string path)
         {
-            return Directory.GetFiles(path, "global.asax").Length > 0;
+            return File.Exists(Path.Combine(path, "global.asax"));
         }
         void deployZip(CloudBlockBlob blob, string name)
         {
             //set directory
             var app = name.Substring(0, name.Length - 4);
-            var rootPath = getRootPath(app);
+            var rootPath = getRootPath(app + '/');
             var appPath = Path.Combine(rootPath, app.Replace('/', '\\'));
             var path = Path.GetDirectoryName(appPath);
+            _logger.Info("deploying " + name + " to " + path);
             Directory.CreateDirectory(appPath);
 
             //deploy files
@@ -113,8 +120,16 @@ namespace AzureDeployer
             if (!isWebPath(appPath))
                 return;
 
+            var configFile = Path.Combine(appPath, "deploy.json");
+            IisConfig config = null;
+            if (File.Exists(configFile))
+            {
+                var configJson = File.ReadAllText(configFile);
+                config = JsonConvert.DeserializeObject<IisConfig>(configJson);
+            }
+
             var appName = Path.GetFileName(appPath);
-            IisHelper.CreateApplication(appName, appPath, _appRootPath + '/' + app);
+            IisHelper.CreateApplication(appName, appPath, _appRootPath + '/' + app, config);
 
             var wildcards = blob.Container
                                 .ListBlobs("*", true)
@@ -133,6 +148,7 @@ namespace AzureDeployer
             var rootPath = getRootPath(name);            
             var filepath = Path.Combine(rootPath, name.Replace('/', '\\'));
             var dir = Path.GetDirectoryName(filepath);
+            _logger.Info("deploying " + name + " to " + filepath);
             // ReSharper disable once AssignNullToNotNullAttribute
             Directory.CreateDirectory(dir);
 

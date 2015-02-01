@@ -56,7 +56,7 @@ namespace AzureDeployer
             }
         }
 
-        public static void CreateApplication(string appName, string appPath, string virtualAppPath, bool autoStart = false, int idleTimeout = 20)
+        public static void CreateApplication(string appName, string appPath, string virtualAppPath, IisConfig config = null)
         {
             //create app
             using (var mgr = new ServerManager())
@@ -79,17 +79,23 @@ namespace AzureDeployer
                     iisAppPool.ProcessModel.IdentityType = ProcessModelIdentityType.NetworkService;
                     hasChange = true;
                 }
+                config = config ?? IisConfig.Default;
                 var startMode = iisAppPool["startMode"] as string;
-                var target = autoStart ? "AlwaysRunning" : "OnDemand";
+                var target = config.AutoStart ? "AlwaysRunning" : "OnDemand";
                 if (startMode != target)
                 {
                     iisAppPool["startMode"] = target;
                     hasChange = true;
                 }
-                var target2 = TimeSpan.FromMinutes(idleTimeout);
+                var target2 = TimeSpan.FromMinutes(config.IdleTimeout);
                 if (iisAppPool.ProcessModel.IdleTimeout != target2)
                 {
                     iisAppPool.ProcessModel.IdleTimeout = target2;
+                    hasChange = true;
+                }
+                if (iisAppPool.Enable32BitAppOnWin64 != config.Enable32Bit)
+                {
+                    iisAppPool.Enable32BitAppOnWin64 = config.Enable32Bit;
                     hasChange = true;
                 }
                 if (hasChange)
@@ -105,9 +111,9 @@ namespace AzureDeployer
                     hasChange = true;
                 }
                 var preloadEnabled = Equals(iisApp["preloadEnabled"], true);
-                if (preloadEnabled != autoStart)
+                if (preloadEnabled != config.AutoStart)
                 {
-                    iisApp["preloadEnabled"] = autoStart;
+                    iisApp["preloadEnabled"] = config.AutoStart;
                     hasChange = true;
                 }
                 if (hasChange)
