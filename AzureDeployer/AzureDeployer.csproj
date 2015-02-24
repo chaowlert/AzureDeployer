@@ -98,7 +98,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.3\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\TripsBox\backend\packages\Microsoft.Web.Administration.7.0.0.0\lib\net20\Microsoft.Web.Administration.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.2.0.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
     </Reference>
@@ -125,7 +128,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeployerContext.cs" />
-    <Compile Include="FileWatcher.cs" />
     <Compile Include="IisConfig.cs" />
     <Compile Include="IisHelper.cs" />
     <Compile Include="ModuleDeployer.cs" />

@@ -56,7 +56,7 @@ namespace AzureDeployer
             }
         }
 
-        public static void CreateApplication(string appName, string appPath, string virtualAppPath, IisConfig config = null)
+        public static void CreateApplication(string appName, string appPath, string virtualAppPath, IisConfig config = null, int siteIndex = 0)
         {
             //create app
             using (var mgr = new ServerManager())
@@ -102,10 +102,10 @@ namespace AzureDeployer
                     mgr.CommitChanges();
 
                 hasChange = false;
-                var iisApp = mgr.Sites[0].Applications[virtualAppPath];
+                var iisApp = mgr.Sites[siteIndex].Applications[virtualAppPath];
                 if (iisApp == null)
                 {
-                    iisApp = mgr.Sites[0].Applications.Add(virtualAppPath, appPath);
+                    iisApp = mgr.Sites[siteIndex].Applications.Add(virtualAppPath, appPath);
                     iisApp.ApplicationPoolName = appName;
                     iisApp.EnabledProtocols = "https,http";
                     hasChange = true;
