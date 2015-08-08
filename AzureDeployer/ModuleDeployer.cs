@@ -55,6 +55,8 @@ namespace AzureDeployer
                         }
                         foreach (var dir in Directory.GetDirectories(_localResourcePath))
                         {
+                            if (!isWebPath(dir))
+                                continue;
                             var name = Path.GetFileName(dir);
                             deploy(blob, name + path);
                         }
