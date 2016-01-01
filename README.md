@@ -15,6 +15,13 @@ If blob path is anything else, it will be deployed to local resources.
 5. There is class `IisHelper` to do simple configuration.
 
 ####Example
+In `web.config`, add following to connectionStrings
+```
+<connectionStrings>
+  <add name="DeployerContext" connectionString="DefaultEndpointsProtocol=https;AccountName={name};AccountKey={key}" />
+</connectionStrings>
+```
+
 In `ServiceDefinition.csdef` add local storage and elevate execution context.
 ```
 <?xml version="1.0" encoding="utf-8"?>
