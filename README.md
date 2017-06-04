@@ -3,7 +3,7 @@ AzureDeployer
 
 This is to deploy files or Web Application to WebRole. This is useful for deploying NLog.config, asset files, or additional web applications.
 
-####How to use
+#### How to use
 1. This library use [Azure Storage Extension](https://github.com/chaowlert/AzureStorageExtensions) to connect to blob.  You need to setup connection string and upload files to `modules` folder.
 2. If blob path starts with `approot/`, it will be deployed to RoleEntry.  
 If blob path starts with `sitesroot/{site_number}`, it will be deployed to specific web site.  
@@ -14,7 +14,7 @@ If blob path is anything else, it will be deployed to local resources.
 4. To deploy, call `ModuleDeployer.Deploy`.
 5. There is class `IisHelper` to do simple configuration.
 
-####Example
+#### Example
 In `web.config`, add following to connectionStrings
 ```
 <connectionStrings>
