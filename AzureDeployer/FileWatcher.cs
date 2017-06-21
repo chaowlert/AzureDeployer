@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AzureDeployer
@@ -84,7 +85,7 @@ namespace AzureDeployer
         {
             if (!_bag.TryAdd(e.Name, true))
                 return;
-            await Task.Delay(50);
+            await Task.Delay(500);
             var value = loadFile(e.Name, e.FullPath, creator);
             if (value != null)
             {
@@ -92,13 +93,15 @@ namespace AzureDeployer
                 _store[e.Name] = value;
                 old?.Dispose();
             }
-            _bag.TryRemove(e.Name, out bool b);
+            _bag.TryRemove(e.Name, out bool _);
         }
 
         readonly ConcurrentDictionary<string, bool> _bag = new ConcurrentDictionary<string, bool>();
 
-        object loadFile(string name, string path, Func<Stream, object> func)
+        object loadFile(string name, string path, Func<Stream, object> func, int time = 0)
         {
+            if (time >= 3)
+                return null;
             try
             {
                 using (var file = File.OpenRead(path))
@@ -107,6 +110,11 @@ namespace AzureDeployer
                     _logger.Info("Read " + name + " success");
                     return result;
                 }
+            }
+            catch (IOException)
+            {
+                Thread.Sleep(500);
+                return loadFile(name, path, func, time + 1);
             }
             catch (Exception ex)
             {
